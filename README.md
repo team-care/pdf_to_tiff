@@ -6,19 +6,27 @@ PDF画像を(白黒=grayscaleの)TIFFへ変換するサンプルです。
 
 ### Development
 
-VSCodeの[Remote Containers](https://code.visualstudio.com/docs/remote/containers)機能を使用しています。
+1. Dockerを利用できる環境を用意する。
 
-* [Getting started](https://code.visualstudio.com/docs/remote/containers#_getting-started)の通りにセットアップ
-* F1ボタンを押して[Remote-Containers: Add Development Container Configuration~](https://code.visualstudio.com/docs/remote/containers#_quick-start-open-an-existing-folder-in-a-container)を選択。`Dockerfile.dev`を選択してconfigurationを作成。
-  * 初回はコンテナの作成に時間がかかる
-* Terminalを開くと、コンテナ内で開ける。
+2. 以下のコマンドを順番に実行してAWS Lambdaにデプロイするパッケージを作成する。
+    ```
+    docker build -t pdf-to-itff .
+    docker run -d --name package-build pdf-to-itff
+    docker cp package-build:deploy.zip .
+    docker rm package-build
+    ```
 
-以下のコマンドで変換結果を確認可能。
+3. AWS Lambdaに作成した`deploy.zip`をアップロードする。
 
-```
-python convert.py data/tis_200206.pdf
-```
+    ランタイム：Python3.7
 
+    ハンドラ：main.handler
+
+4. 以下のコマンドで動作確認が可能
+    ```
+    aws lambda invoke --function-name Lambda関数名 test.tif
+    ```
+    ※Lambda関数内のpdfがtiffに変換されて`test.tif`として返却される。
 
 ### Production
 
