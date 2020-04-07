@@ -10,15 +10,15 @@ PDF画像を(白黒=grayscaleの)TIFFへ変換するサンプルです。
 
 2. 以下のコマンドを順番に実行してAWS Lambdaにデプロイするパッケージを作成する。
     ```
-    docker build -t pdf-to-itff .
-    docker run -d --name package-build pdf-to-itff
+    docker build -t pdf-to-tiff .
+    docker run -d --name package-build pdf-to-tiff
     docker cp package-build:deploy.zip .
     docker rm package-build
     ```
 
 3. AWS Lambdaに作成した`deploy.zip`をアップロードする。
 
-    ランタイム：Python3.7
+    ランタイム：Python3.8
 
     ハンドラ：main.handler
 
