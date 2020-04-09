@@ -2,9 +2,20 @@
 
 PDF画像を(白黒=grayscaleの)TIFFへ変換するサンプルです。
 
+* [pdf2image](https://github.com/Belval/pdf2image)
+
 ## How to run
 
-### Development
+### Lambda Style
+
+![lambda_style.PNG](./docs/lambda_style.PNG)
+
+
+### Fargate Style
+
+![fargate_style.PNG](./docs/fargate_style.PNG)
+
+#### Development
 
 VSCodeの[Remote Containers](https://code.visualstudio.com/docs/remote/containers)機能を使用しています。
 
@@ -18,12 +29,4 @@ VSCodeの[Remote Containers](https://code.visualstudio.com/docs/remote/container
 ```
 python convert.py data/tis_200206.pdf
 ```
-
-
-### Production
-
-
-## Dependency
-
-* [pdf2image](https://github.com/Belval/pdf2image)
 
