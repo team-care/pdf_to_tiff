@@ -7,14 +7,17 @@ os.environ["LD_LIBRARY_PATH"] = os.environ.get("LD_LIBRARY_PATH", "") + ":/var/t
 def handler(event, context):
     input_path = "data/tis_200206.pdf"
     output_path = "/tmp/data/test.tif"
-    with open(input_path, "rb") as f:
-        images = convert_from_bytes(f.read())
     if not os.path.exists("/tmp/data/"):
         os.makedirs("/tmp/data/")
 
-    images = [i.convert("L") for i in images]
+    with open(input_path, "rb") as f:
+        images = convert_from_bytes(
+            pdf_file=f.read(),
+            grayscale=True)
     images[0].save(
-        str(output_path),
+        output_path,
+        format='TIFF',
+        dpi=(400, 400),
         compression="tiff_deflate",
         save_all=True,
         append_images=images[1:])

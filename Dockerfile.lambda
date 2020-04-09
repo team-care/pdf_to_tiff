@@ -19,7 +19,8 @@ RUN wget https://www.python.org/ftp/python/3.8.2/Python-3.8.2.tgz && \
     ./configure --enable-optimizations && \
     make altinstall
 RUN rm -rf /package && \
-    mkdir -p /package/poppler/
+    mkdir -p /package/poppler/ && \
+    mkdir -p /package/data/
 RUN updatedb
 RUN cp -Rf $(which pdfdetach) /package/poppler/ && \
     cp -Rf $(which pdffonts) /package/poppler/ && \
@@ -48,5 +49,6 @@ RUN ln -nfs /usr/local/bin/pip3.8 /usr/local/bin/pip && \
     ln -nfs /usr/local/bin/python3.8 /usr/local/bin/python
 RUN pip install -r requirements.txt -t /package/
 ADD lambda_function /package
+ADD data /package/data
 RUN cd /package && \
     zip -r9 /deploy.zip .
