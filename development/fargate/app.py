@@ -16,14 +16,13 @@ async def post(file: UploadFile = File(...)):
 
 def convert(filename, file):
     output_path = f"./data/{filename}.tif"
-    images = convert_from_bytes(
-        pdf_file=file,
-        grayscale=True)
+    images = convert_from_bytes(file)
+    images = [i.convert("1") for i in images]
     images[0].save(
         output_path,
         format='TIFF',
         dpi=(400, 400),
-        compression="tiff_deflate",
+        compression="group4",
         save_all=True,
         append_images=images[1:])
     with open(output_path, "rb") as f:

@@ -1,0 +1,143 @@
+service: pdf-to-tiff
+
+# プロバイダー定義
+provider:
+  name: aws
+  runtime: python3.8
+  stage: ${opt:stage}
+  region: ap-northeast-1
+  stackName: ${opt:stage}-pdf-to-tiff
+  apiName: ${opt:stage}-pdf-to-tiff-api
+  versionFunctions: true
+  logRetentionInDays: 90
+  deploymentBucket: ${opt:stage}-pdf-to-tiff-deployment
+  apiGateway:
+    binaryMediaTypes:
+      - 'application/pdf'
+  apiKeys:
+    - name : ${opt:stage}-pdf-to-tiff-api-key
+  # # API GatewayのログをCloudWatch Logsに出力する場合は有効にする 
+  # logs:
+  #   restApi: true
+
+# パッケージ定義
+package:
+  individually: true
+
+# カスタム定義
+custom:
+  # Lambda Function関連
+  functionName: ${opt:stage}-pdf-to-tiff-converter
+  serverlessPath: src
+  customLambdaRole: ${opt:stage}-pdf-to-tiff-converter-role
+  customLambdaPolicy: ${opt:stage}-pdf-to-tiff-converter-policy
+
+# 関数定義
+functions:
+  # pdf-to-tiff-converter Lambda関数定義
+  pdf-to-tiff-converter:
+    name: ${self:custom.functionName}
+    handler: main.handler
+    package:
+      artifact: ${self:custom.serverlessPath}/deploy.zip
+    description: "convert pdf to tiff"
+    timeout: 30
+    role: customRole
+    events:
+      - http:
+          path: convert
+          method: post
+          integration: lambda
+          private: true
+          request:
+            passThrough: WHEN_NO_MATCH
+            # カスタムテンプレートの作成
+            template:
+              application/pdf: '{
+                "headers": {
+                  #foreach($param in $input.params().header.keySet())
+                  "$param": "$util.escapeJavaScript($input.params().header.get($param))"
+                  #if($foreach.hasNext),#end
+                  #end
+                },
+                "body": "$input.body"
+              }'
+            parameters:
+              headers:
+                InputFileName: true
+                OutputFileExtention: true
+                Content-Type: true
+          response:
+            statusCodes:
+              # デフォルトのステータスコード
+              200:
+                pattern: ''
+                template: $input.path('$.body')
+                headers:
+                  Content-Type: "'application/pdf'"
+              # カスタムステータスコード
+              400:
+                pattern: '.*"statusCode": 400,.*'
+                template: '{"message": "$util.parseJson($input.path("$.errorMessage")).body.message"}'
+                headers:
+                  Content-Type: "'application/json'"
+              503:
+                pattern: '.*"statusCode": 503,.*'
+                template: '{"message": "$util.parseJson($input.path("$.errorMessage")).body.message"}'
+                headers:
+                  Content-Type: "'application/json'"
+# リソース定義
+resources:
+  - Resources:
+      # pdf-to-tiff-converter Lambda用ロール定義
+      customRole:
+        Type: AWS::IAM::Role
+        Properties:
+          AssumeRolePolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: ""
+                Effect: Allow
+                Principal:
+                  Service: "lambda.amazonaws.com"
+                Action:
+                  - "sts:AssumeRole"
+          Policies:
+            - PolicyName: ${self:custom.customLambdaPolicy}
+              PolicyDocument:
+                Version: "2012-10-17"
+                Statement:
+                  - Effect: Allow
+                    Action:
+                      - "logs:CreateLogStream"
+                      - "logs:PutLogEvents"
+                    Resource:
+                      - !Join [ "", [ "arn:aws:logs:", !Ref AWS::Region, ":", !Ref AWS::AccountId, ":log-group:/aws/lambda/${self:custom.functionName}:log-stream:*" ] ]
+          RoleName: ${self:custom.customLambdaRole}
+      # ゲートウェイのレスポンス定義
+      Default4xxGatewayResponse:
+        Type: 'AWS::ApiGateway::GatewayResponse'
+        Properties:
+          ResponseType: DEFAULT_4XX
+          RestApiId: 
+            Ref: "ApiGatewayRestApi"
+          StatusCode: '400'
+      Default5xxGatewayResponse:
+        Type: 'AWS::ApiGateway::GatewayResponse'
+        Properties:
+          ResponseType: DEFAULT_5XX
+          RestApiId: 
+            Ref: "ApiGatewayRestApi"
+          StatusCode: '500'
+      TimeoutGatewayResponse:
+        Type: 'AWS::ApiGateway::GatewayResponse'
+        Properties:
+          ResponseType: INTEGRATION_TIMEOUT
+          RestApiId: 
+            Ref: "ApiGatewayRestApi"
+          StatusCode: '503'
+      ApiGatewayMethodConvertPost:
+        Type: 'AWS::ApiGateway::Method'
+        Properties:
+          Integration:
+            ContentHandling: CONVERT_TO_TEXT
