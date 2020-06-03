@@ -56,7 +56,7 @@ RUN cp -Rf $(which pdfdetach) /package/poppler/ && \
     cp -Rf $(locate /usr/lib64/libjbig) /package/poppler/ && \
     cp -Rf $(locate /usr/lib64/libexpat) /package/poppler/ && \
     cp -Rf $(locate /usr/lib64/libz) /package/poppler/
-COPY src/binary_type /package
+COPY src/main /package
 COPY config/logging.conf /package/config
 COPY config/requirements.txt .
 RUN pip install -r requirements.txt -t /package/
