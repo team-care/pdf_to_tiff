@@ -16,7 +16,7 @@ Dependency
 ![lambda_style.PNG](./docs/lambda_style.PNG)
 
 1. 事前準備
-    - dockerの環境構築
+    - Dockerの環境構築
     - npmのインストール
     - serverless frameworkのインストール
       - `npm install -g serverless`
