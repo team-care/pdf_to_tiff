@@ -47,6 +47,7 @@ functions:
       - http:
           path: convert
           method: post
+          async: true
           integration: lambda
           private: true
           request:
