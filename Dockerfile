@@ -45,6 +45,7 @@ RUN cp -Rf $(which pdfdetach) /package/poppler/ && \
     cp -Rf $(which pdftops) /package/poppler/ && \
     cp -Rf $(which pdftotext) /package/poppler/ && \
     cp -Rf $(which pdfunite) /package/poppler/ && \
+    cp -Rf $(locate /usr/lib64/libuuid) /package/poppler/ && \
     cp -Rf $(locate /usr/lib64/libpoppler) /package/poppler/ && \
     cp -Rf $(locate /usr/lib64/libjpeg) /package/poppler/ && \
     cp -Rf $(locate /usr/lib64/libtiff) /package/poppler/ && \
