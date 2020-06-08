@@ -1,6 +1,7 @@
 from pdf2image import convert_from_path
 from logging import getLogger
 from .utils import Utils, LambdaRuntimeException
+from .s3_controller import S3Controller
 
 logger = getLogger(__name__)
 
@@ -8,6 +9,7 @@ logger = getLogger(__name__)
 class PDFtoTIFFConverter:
     def __init__(self):
         self._utils = Utils()
+        self._s3_controller = S3Controller()
 
     def execution(self, event, context):
         try:
@@ -42,6 +44,10 @@ class PDFtoTIFFConverter:
 
             # tifに変換
             tif_data = self._convert(input_file_path)
+
+            # s3に保存
+            output_key = self._s3_controller.put_s3_object(
+                tif_data, output_filename)
 
             # 成功応答
             return self._utils.success_response(tif_data)
