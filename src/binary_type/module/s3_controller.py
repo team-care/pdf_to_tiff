@@ -4,6 +4,7 @@ from logging import getLogger
 from .utils import LambdaRuntimeException
 
 logger = getLogger(__name__)
+output_filename = "hogehoge.tif"
 
 
 class S3Controller:

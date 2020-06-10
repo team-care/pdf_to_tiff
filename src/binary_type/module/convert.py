@@ -4,6 +4,7 @@ from .utils import Utils, LambdaRuntimeException
 from .s3_controller import S3Controller
 
 logger = getLogger(__name__)
+output_filename = "hogehoge.tif"
 
 
 class PDFtoTIFFConverter:
