@@ -175,7 +175,6 @@ resources:
                 Principal:
                   AWS: !Join [ "", [ "arn:aws:iam::", !Ref AWS::AccountId, ":role/${self:custom.customLambdaRole}" ] ]
                 Action:
-                  - "s3:GetObject"
                   - "s3:PutObject"
                 Resource:
                   - !Sub "arn:aws:s3:::${self:custom.s3BucketName}"

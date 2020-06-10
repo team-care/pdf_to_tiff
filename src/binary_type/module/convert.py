@@ -4,7 +4,6 @@ from .utils import Utils, LambdaRuntimeException
 from .s3_controller import S3Controller
 
 logger = getLogger(__name__)
-output_filename = "hogehoge.tif"
 
 
 class PDFtoTIFFConverter:
@@ -47,6 +46,7 @@ class PDFtoTIFFConverter:
             tif_data = self._convert(input_file_path)
 
             # s3に保存
+            output_filename = input_filename.replace(".pdf", ".tif")
             output_key = self._s3_controller.put_s3_object(
                 tif_data, output_filename)
 

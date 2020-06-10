@@ -4,7 +4,6 @@ from logging import getLogger
 from .utils import LambdaRuntimeException
 
 logger = getLogger(__name__)
-output_filename = "hogehoge.tif"
 
 
 class S3Controller:
@@ -12,18 +11,6 @@ class S3Controller:
         self._s3_resource = boto3.resource('s3')
         self._s3_bucket_name = os.environ.get("S3_BUCKET_NAME")
         self._s3_output_prefix = "tif/"
-
-    def get_s3_object(self, input_key):
-        try:
-            response = self._s3_resource.Object(
-                self._s3_bucket_name, input_key).get()
-            body = response["Body"].read()
-            logger.info(f"Get object {input_key}")
-            return body
-        except Exception:
-            message = f"{input_key} is not exist or broken"
-            logger.error(message)
-            raise LambdaRuntimeException(503, message)
 
     def put_s3_object(self, data, output_filename, content_type='image/tiff'):
         try:

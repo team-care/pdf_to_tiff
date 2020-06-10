@@ -6,7 +6,6 @@ from pathlib import Path
 from logging import getLogger
 
 logger = getLogger(__name__)
-output_filename = "hogehoge.tif"
 
 
 class Utils:
