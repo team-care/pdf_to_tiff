@@ -11,9 +11,12 @@ provider:
   versionFunctions: true
   logRetentionInDays: 90
   deploymentBucket: ${opt:stage}-pdf-to-tiff-deployment
+  apiGateway:
+    binaryMediaTypes:
+      - 'application/pdf'
   apiKeys:
-    - name: ${opt:stage}-pdf-to-tiff-api-key
-  # # API GatewayのログをCloudWatch Logsに出力する場合はコメント解除
+    - name : ${opt:stage}-pdf-to-tiff-api-key
+  # # API GatewayのログをCloudWatch Logsに出力する場合は有効にする 
   # logs:
   #   restApi: true
 
@@ -25,7 +28,6 @@ package:
 custom:
   # Lambda Function関連
   functionName: ${opt:stage}-pdf-to-tiff-converter
-  serverlessPath: src
   customLambdaRole: ${opt:stage}-pdf-to-tiff-converter-role
   customLambdaPolicy: ${opt:stage}-pdf-to-tiff-converter-policy
   s3BucketName: ${opt:stage}-pdf-to-tiff-bucket
@@ -37,7 +39,7 @@ functions:
     name: ${self:custom.functionName}
     handler: main.handler
     package:
-      artifact: ${self:custom.serverlessPath}/deploy.zip
+      artifact: deploy.zip
     description: "convert pdf to tiff"
     timeout: 30
     role: customRole
@@ -47,21 +49,35 @@ functions:
       - http:
           path: convert
           method: post
+          async: true
           integration: lambda
           private: true
           request:
             passThrough: WHEN_NO_MATCH
-            # バイナリ直接変換タイプを使用する場合はコメントアウト
-            schema:
-              application/json: ${file(config/model.json)}
+            # カスタムテンプレートの作成
+            template:
+              application/pdf: '{
+                "headers": {
+                  #foreach($param in $input.params().header.keySet())
+                  "$param": "$util.escapeJavaScript($input.params().header.get($param))"
+                  #if($foreach.hasNext),#end
+                  #end
+                },
+                "body": "$input.body"
+              }'
+            parameters:
+              headers:
+                InputFileName: true
+                OutputFileExtention: true
+                Content-Type: true
           response:
             statusCodes:
               # デフォルトのステータスコード
               200:
                 pattern: ''
-                template: '{"message": "$input.path("$.body").message"}'
+                template: $input.path('$.body')
                 headers:
-                  Content-Type: "'application/json'"
+                  Content-Type: "'application/pdf'"
               # カスタムステータスコード
               400:
                 pattern: '.*"statusCode": 400,.*'
@@ -130,6 +146,11 @@ resources:
           RestApiId: 
             Ref: "ApiGatewayRestApi"
           StatusCode: '503'
+      ApiGatewayMethodConvertPost:
+        Type: 'AWS::ApiGateway::Method'
+        Properties:
+          Integration:
+            ContentHandling: CONVERT_TO_TEXT
 
       # S3定義
       S3Bucket:
@@ -153,7 +174,6 @@ resources:
                 Principal:
                   AWS: !Join [ "", [ "arn:aws:iam::", !Ref AWS::AccountId, ":role/${self:custom.customLambdaRole}" ] ]
                 Action:
-                  - "s3:GetObject"
                   - "s3:PutObject"
                 Resource:
                   - !Sub "arn:aws:s3:::${self:custom.s3BucketName}"

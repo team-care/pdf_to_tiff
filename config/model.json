@@ -2,9 +2,9 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "title": "input key validate",
-    "required": ["input_key"],
+    "required": ["key"],
     "properties": {
-      "input_key": {
+      "key": {
         "type": "string"
       }
     }
