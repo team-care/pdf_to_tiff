@@ -10,9 +10,6 @@ Dependency
 
 ### Fargate Style
 
-![fargate_style.PNG](../docs/fargate_style.PNG)
-※現在は上記の仕様を満たしていません。
-
 1. Dockerを利用できる環境を用意する。
 
 2. 以下のコマンドを実行してAWS Lambdaにデプロイするパッケージを作成する。
@@ -31,7 +28,7 @@ Dependency
         ```
         curl -X POST --noproxy localhost -F 'Filename=./data/tis_200206.pdf' -F 'file=@./data/tis_200206.pdf' http://localhost:8000 | jq -r '.file' | base64 -di > ./test.tif
         ```
-        ※jqコマンドを使用できるようにしておく必要がある。
+        ※jqコマンドを使用できるようにしておく必要がある。<br>
         ※pdfがtiffに変換されて`test.tif`として返却される。
         <details><summary>python requests</summary><div>
 
