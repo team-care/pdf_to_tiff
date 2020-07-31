@@ -37,7 +37,8 @@ class PDFtoTIFFConverter:
                 os.remove(image)
             self._logger.info(f"Convert success, save {filepath}")
             return filepath
-        except Exception:
+        except Exception as ex:
             message = f"Failed convert {filename} to tiff"
             self._logger.error(message)
+            self._logger.error(ex)
             raise LambdaRuntimeException(503, message)
