@@ -1,0 +1,13 @@
+FROM lambci/lambda:build-python3.8
+
+# 必要なライブラリインストール
+RUN yum install -y poppler-utils
+
+COPY src /ci/src
+COPY tests /ci/tests
+COPY requirements-test.txt /ci/requirements-test.txt
+COPY config/logging.conf /ci/config/logging.conf
+RUN pip install -r /ci/requirements-test.txt
+
+WORKDIR /ci
+ENTRYPOINT [ "pytest", "/ci/tests/" ]
