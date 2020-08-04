@@ -18,6 +18,7 @@ class PDFtoTIFFConverter:
             # PDFからtifに変換
             image_path = convert_from_path(
                 thread_count=5,
+                fmt="jpg",
                 pdf_path=pdf_path,
                 output_folder=output_dir,
                 output_file=filename,
